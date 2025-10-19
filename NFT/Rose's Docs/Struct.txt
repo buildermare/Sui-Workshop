@@ -1,0 +1,28 @@
+
+
+struct, bir şeyin neye benzediğini tarif eden bir şablondur.
+
+  Analoji: Bir kimlik kartı düşün. Kimlik kartı tek bir bilgi değildir, bir sürü bilginin birleşimidir:
+   * Ad
+   * Soyad
+   * Doğum Tarihi
+   * TC Kimlik No
+
+  İşte struct, bu kimlik kartının boş halidir. Sen bir Hero (Kahraman) struct'ı oluşturduğunda, aslında şunu diyorsun: "Benim projemdeki her kahramanın bir
+  id'si, bir name'i (adı) ve bir strength'i (gücü) olacak."
+
+  Bu şablonu kullanarak istediğin kadar yeni kahraman (yeni "nesne") yaratabilirsin. Her biri aynı yapıya sahip olur ama içindeki bilgiler farklıdır.
+
+   // Bu bir şablon (blueprint)
+   struct Hero has key, store {
+       id: UID,
+       name: String,
+       strength: u64
+   }
+
+  Yetenekler: key, store, drop, copy
+
+  Bu dört kelime, bir struct'ın süper güçleri veya kısıtlamalarıdır. Bir struct'ın ne yapıp yapamayacağını belirlerler. Bunlara "ability" (yetenek) denir.
+
+    Bir video oyunu karakteri düşün. Bu karakterin uçma, ışınlanma, eşyaları saklama gibi yetenekleri olabilir veya olmayabilir. İşte bu kelimeler de
+  struct'lara bu tür kurallar koyar.
