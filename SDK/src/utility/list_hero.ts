@@ -1,25 +1,26 @@
-// Import the Transaction class from the SUI transactions library. This is needed to create a new transaction.
+// Sui işlemleri kütüphanesinden Transaction sınıfını import ediyoruz
 import { Transaction } from "@mysten/sui/transactions";
 
-// This function is for listing a hero for sale. It takes the package ID, hero's ID, and the price in SUI as input.
-export const listHero = (packageId: string, heroId: string, priceInSui: string) => {
-  // Create a new transaction object.
+// Hero'yu satışa çıkarma fonksiyonu - package ID, hero ID'si ve SUI cinsinden fiyat alır
+export const listHero = (
+  packageId: string,
+  heroId: string,
+  priceInSui: string,
+) => {
+  // Yeni bir işlem objesi oluştur
   const tx = new Transaction();
 
-  // Convert the price from SUI to MIST (the smallest unit of SUI). 1 SUI = 1,000,000,000 MIST.
+  // Fiyatı SUI'den MIST'e çevir (SUI'nin en küçük birimi). 1 SUI = 1,000,000,000 MIST
   const priceInMist = Number(priceInSui) * 1_000_000_000;
 
-  // Create a new move call to the 'list_hero' function in the smart contract.
+  // Smart contract'taki 'list_hero' fonksiyonunu çağır
   tx.moveCall({
-    // The target function to call, constructed from the package ID.
+    // Çağrılacak hedef fonksiyon - package ID'den oluşturulur
     target: `${packageId}::hero::list_hero`,
-    // The arguments for the function: the hero's ID and the price in MIST.
-    arguments: [
-      tx.object(heroId), 
-      tx.pure.u64(priceInMist)
-    ],
+    // Fonksiyon argümanları: hero ID'si ve MIST cinsinden fiyat
+    arguments: [tx.object(heroId), tx.pure.u64(priceInMist)],
   });
-  
-  // Return the created transaction.
+
+  // Oluşturulan işlemi geri döndür
   return tx;
 };

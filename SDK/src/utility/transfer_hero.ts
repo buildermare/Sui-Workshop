@@ -1,22 +1,19 @@
-// Import the Transaction class from the SUI transactions library. This is needed to create a new transaction.
+// Sui işlemleri kütüphanesinden Transaction sınıfını import ediyoruz
 import { Transaction } from "@mysten/sui/transactions";
 
-// This function is for transferring a hero to another address. It takes the package ID, hero's ID, and the recipient's address as input.
+// Hero transfer fonksiyonu - package ID, hero ID'si ve alıcı adresi alır
 export const transferHero = (packageId: string, heroId: string, to: string) => {
-  // Create a new transaction object.
+  // Yeni bir işlem objesi oluştur
   const tx = new Transaction();
 
-  // Create a new move call to the 'transfer_hero' function in the smart contract.
+  // Smart contract'taki 'transfer_hero' fonksiyonunu çağır
   tx.moveCall({
-    // The target function to call, constructed from the package ID.
+    // Çağrılacak hedef fonksiyon - package ID'den oluşturulur
     target: `${packageId}::hero::transfer_hero`,
-    // The arguments for the function: the hero's ID and the recipient's address.
-    arguments: [
-      tx.object(heroId), 
-      tx.pure.address(to)
-    ],
+    // Fonksiyon argümanları: hero ID'si ve alıcının adresi
+    arguments: [tx.object(heroId), tx.pure.address(to)],
   });
-  
-  // Return the created transaction.
+
+  // Oluşturulan işlemi geri döndür
   return tx;
 };

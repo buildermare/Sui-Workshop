@@ -1,34 +1,38 @@
+// Hero NFT'si için tip tanımlaması
 export interface Hero {
   uid: {
-    id: string;
+    id: string; // Hero'nun benzersiz ID'si
   };
-  name: string;
-  image_url: string;
-  power: string;
+  name: string; // Hero ismi
+  image_url: string; // Hero resminin URL'i
+  power: string; // Hero'nun güç seviyesi
 }
 
+// Satıştaki hero için tip tanımlaması
 export interface ListHero {
   uid: {
-    id: string;
+    id: string; // Listeleme nesnesinin ID'si
   };
   nft: {
-    fields: Hero;
+    fields: Hero; // Hero NFT'sinin verileri
   };
-  price: string;
-  seller: string;
+  price: string; // Satış fiyatı
+  seller: string; // Satıcının adresi
 }
 
+// Hero satışa çıkarıldığında oluşan olay için tip
 export interface HeroListedEvent {
-  id: string;
-  price: string;
-  seller: string;
-  timestamp: string;
+  id: string; // Hero ID'si
+  price: string; // Fiyat
+  seller: string; // Satıcı
+  timestamp: string; // Zaman damgası
 }
 
+// Hero satın alındığında oluşan olay için tip
 export interface HeroBoughtEvent {
-  id: string;
-  price: string;
-  buyer: string;
-  seller: string;
-  timestamp: string;
+  id: string; // Hero ID'si
+  price: string; // Fiyat
+  buyer: string; // Alıcı
+  seller: string; // Satıcı
+  timestamp: string; // Zaman damgası
 }

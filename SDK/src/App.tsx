@@ -1,27 +1,37 @@
+// Sui dApp Kit'ten ConnectButton bileşenini import ediyoruz - bu cüzdan bağlantı butonu için kullanılır
 import { ConnectButton } from "@mysten/dapp-kit";
+// Radix UI kütüphanesinden gerekli UI bileşenlerini import ediyoruz
 import { Box, Container, Flex, Heading, Separator } from "@radix-ui/themes";
+// React'ten useState hook'ini import ediyoruz - bu bileşen durum yönetimi için kullanılır
 import { useState } from "react";
+// Cüzdan durumunu gösteren bileşeni import ediyoruz
 import { WalletStatus } from "./components/WalletStatus";
+// Hero oluşturma bileşenini import ediyoruz
 import { CreateHero } from "./components/CreateHero";
+// Sahip olunan nesneleri gösteren bileşeni import ediyoruz
 import { OwnedObjects } from "./components/OwnedObjects";
+// Paylaşılan nesneleri (marketplace) gösteren bileşeni import ediyoruz
 import SharedObjects from "./components/SharedObjects";
+// Olay geçmişini gösteren bileşeni import ediyoruz
 import EventsHistory from "./components/EventsHistory";
 
 function App() {
+  // refreshKey state'i - bileşenleri yenilemek için kullanılır
+  // Örneğin bir işlem yapıldıktan sonra verileri güncellemek için bu state değiştirilir
   const [refreshKey, setRefreshKey] = useState(0);
   return (
     <>
-      {/* Header */}
+      {/* Header - Sayfanın üst kısmı */}
       <Flex
-        position="sticky"
-        px="4"
-        py="3"
-        justify="between"
-        align="center"
+        position="sticky" // Sayfa kaydırıldığında header'ın üstte kalmasını sağlar
+        px="4" // Yatay padding
+        py="3" // Dikey padding
+        justify="between" // İçerikleri aralık olarak dağıt
+        align="center" // Dikey olarak ortala
         style={{
-          borderBottom: "1px solid var(--gray-a2)",
-          background: "var(--color-background)",
-          zIndex: 10
+          borderBottom: "1px solid var(--gray-a2)", // Alt çizgi
+          background: "var(--color-background)", // Arka plan rengi
+          zIndex: 10, // Diğer elementlerin üzerinde kalmasını sağlar
         }}
       >
         <Box>
@@ -29,47 +39,57 @@ function App() {
         </Box>
 
         <Box>
+          {/* Cüzdan bağlantı butonu - Sui dApp Kit tarafından sağlanır */}
           <ConnectButton />
         </Box>
       </Flex>
 
-      {/* Main Content */}
+      {/* Ana İçerik Alanı */}
       <Container size="4" style={{ padding: "24px" }}>
         <Flex direction="column" gap="8">
-          
-          {/* Wallet Status Section */}
+          {/* Cüzdan Durumu Bölümü */}
           <Box>
+            {/* Kullanıcının cüzdan bilgilerini ve bakiyesini gösterir */}
             <WalletStatus />
           </Box>
 
           <Separator size="4" />
 
-          {/* Create Hero Section */}
+          {/* Hero Oluşturma Bölümü */}
           <Box>
+            {/* Yeni bir Hero NFT'si oluşturmak için kullanılan form */}
             <CreateHero refreshKey={refreshKey} setRefreshKey={setRefreshKey} />
           </Box>
 
           <Separator size="4" />
 
-          {/* Owned Heroes Section */}
+          {/* Sahip Olunan Hero'lar Bölümü */}
           <Box>
-            <OwnedObjects refreshKey={refreshKey} setRefreshKey={setRefreshKey} />
+            {/* Kullanıcının sahip olduğu tüm Hero NFT'lerini listeler */}
+            <OwnedObjects
+              refreshKey={refreshKey}
+              setRefreshKey={setRefreshKey}
+            />
           </Box>
 
           <Separator size="4" />
 
-          {/* Marketplace Section */}
+          {/* Marketplace (Pazar Yeri) Bölümü */}
           <Box>
-            <SharedObjects refreshKey={refreshKey} setRefreshKey={setRefreshKey} />
+            {/* Satılık olan Hero'ları gösteren pazar yeri */}
+            <SharedObjects
+              refreshKey={refreshKey}
+              setRefreshKey={setRefreshKey}
+            />
           </Box>
 
           <Separator size="4" />
 
-          {/* Events History Section */}
+          {/* Olay Geçmişi Bölümü */}
           <Box>
+            {/* Yapılan işlemlerin (satın alma, satma vb.) geçmişini gösterir */}
             <EventsHistory refreshKey={refreshKey} />
           </Box>
-
         </Flex>
       </Container>
     </>

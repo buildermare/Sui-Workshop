@@ -174,3 +174,5 @@ storybook-static
 # Temporary folders
 tmp/
 temp/
+build
+Move.lock

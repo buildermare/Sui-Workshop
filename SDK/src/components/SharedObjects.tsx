@@ -1,77 +1,92 @@
-import { useCurrentAccount, useSuiClientQuery, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
-import { Flex, Heading, Text, Card, Grid, Button, Badge } from "@radix-ui/themes";
+// Sui dApp kit hook'ları - cüzdan, sorgulama ve işlem yönetimi için
+import {
+  useCurrentAccount,
+  useSuiClientQuery,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+} from "@mysten/dapp-kit";
+import {
+  Flex,
+  Heading,
+  Text,
+  Card,
+  Grid,
+  Button,
+  Badge,
+} from "@radix-ui/themes";
 import { useState } from "react";
 import { useNetworkVariable } from "../networkConfig";
 import { ListHero } from "../types/hero";
-// Import the buyHero utility function to handle the purchase transaction.
+// Hero satın alma işlemi için utility fonksiyonu
 import { buyHero } from "../utility/buy_hero";
 import { RefreshProps } from "../types/props";
 
-export default function SharedObjects({ refreshKey, setRefreshKey }: RefreshProps) {
-  // Get the current user's account information.
-  const account = useCurrentAccount();
-  // Get the packageId from the network configuration.
-  const packageId = useNetworkVariable("packageId");
-  // Get the SUI client for interacting with the blockchain.
-  const suiClient = useSuiClient();
-  const [isBuying, setIsBuying] = useState<{ [key: string]: boolean }>({});
-  // Hook to sign and execute transactions.
-  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+export default function SharedObjects({
+  refreshKey,
+  setRefreshKey,
+}: RefreshProps) {
+  const account = useCurrentAccount(); // Mevcut cüzdan hesabı
+  const packageId = useNetworkVariable("packageId"); // Smart contract package ID
+  const suiClient = useSuiClient(); // Sui client
+  const [isBuying, setIsBuying] = useState<{ [key: string]: boolean }>({}); // Her hero için satın alma durumu
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction(); // İşlem imzalama ve çalıştırma
 
-  // Query for 'HeroListed' events to find all listed heroes.
+  // Satışa çıkarılan hero'ları bulmak için 'HeroListed' olaylarını sorgula
   const { data: listedEvents, isPending: eventsLoading } = useSuiClientQuery(
     "queryEvents",
     {
       query: {
-        // Filter for the specific event type from our smart contract.
-        MoveEventType: `${packageId}::hero::HeroListed`
+        // Sadece smart contract'tan gelen HeroListed olaylarını filtrele
+        MoveEventType: `${packageId}::hero::HeroListed`,
       },
-      limit: 50, // Get the latest 50 events.
-      order: "descending" // Order them from newest to oldest.
+      limit: 50, // Son 50 olayı al
+      order: "descending", // Yeniden eskiye doğru sırala
     },
     {
-      // Only run this query if the packageId is available.
+      // Sadece packageId varsa bu sorguyu çalıştır
       enabled: !!packageId,
-      // The query will re-run if these keys change.
+      // Bu anahtarlar değişirse sorgu yeniden çalışır
       queryKey: ["queryEvents", packageId, "HeroListed", refreshKey],
-    }
+    },
   );
 
-  // Get the details of the listed hero objects using their IDs from the events.
+  // Olaylardan gelen ID'leri kullanarak satıştaki hero nesnelerinin detaylarını al
   const { data, isPending, error } = useSuiClientQuery(
     "multiGetObjects",
     {
-      // Get the object IDs from the event data.
-      ids: listedEvents?.data?.map(event => (event.parsedJson as any).id) || [],
+      // Olay verilerinden nesne ID'lerini al
+      ids:
+        listedEvents?.data?.map((event) => (event.parsedJson as any).id) || [],
       options: {
-        showContent: true, // We want to see the content of the objects.
-        showType: true // And their types.
-      }
+        showContent: true, // Nesne içeriğini göster
+        showType: true, // Nesne tiplerini göster
+      },
     },
     {
-      // Only run this query if packageId and listedEvents data are available.
+      // Sadece packageId ve listedEvents verisi varsa bu sorguyu çalıştır
       enabled: !!packageId && !!listedEvents?.data?.length,
-      // The query will re-run if these keys change.
-      queryKey: ["multiGetObjects", listedEvents?.data?.map(event => (event.parsedJson as any).id), refreshKey],
-    }
+      // Bu anahtarlar değişirse sorgu yeniden çalışır
+      queryKey: [
+        "multiGetObjects",
+        listedEvents?.data?.map((event) => (event.parsedJson as any).id),
+        refreshKey,
+      ],
+    },
   );
 
-  // This function handles the logic for buying a hero.
+  // Hero satın alma işlemini yöneten fonksiyon
   const handleBuy = (listHeroId: string, price: string) => {
-    // Don't do anything if there's no account or packageId.
     if (!account || !packageId) return;
-    
-    setIsBuying(prev => ({ ...prev, [listHeroId]: true }));
-    
-    // Create the transaction to buy the hero using the utility function.
+
+    setIsBuying((prev) => ({ ...prev, [listHeroId]: true }));
+
+    // Hero satın alma işlemini oluştur
     const tx = buyHero(packageId, listHeroId, price);
-    // Sign and execute the transaction.
     signAndExecute(
       { transaction: tx },
       {
-        // This will be called when the transaction is successful.
         onSuccess: async ({ digest }) => {
-          // Wait for the transaction to be finalized on the blockchain.
+          // İşlemin blockchain'de onaylanmasını bekle
           await suiClient.waitForTransaction({
             digest,
             options: {
@@ -79,16 +94,15 @@ export default function SharedObjects({ refreshKey, setRefreshKey }: RefreshProp
               showObjectChanges: true,
             },
           });
-          
-          // Refresh the list of heroes.
+
+          // Hero listesini yenile
           setRefreshKey(refreshKey + 1);
-          setIsBuying(prev => ({ ...prev, [listHeroId]: false }));
+          setIsBuying((prev) => ({ ...prev, [listHeroId]: false }));
         },
-        // This will be called if there's an error.
         onError: () => {
-          setIsBuying(prev => ({ ...prev, [listHeroId]: false }));
-        }
-      }
+          setIsBuying((prev) => ({ ...prev, [listHeroId]: false }));
+        },
+      },
     );
   };
 
@@ -127,12 +141,14 @@ export default function SharedObjects({ refreshKey, setRefreshKey }: RefreshProp
     );
   }
 
-  const listedHeroes = data.filter(obj => obj.data?.content && 'fields' in obj.data.content);
+  const listedHeroes = data.filter(
+    (obj) => obj.data?.content && "fields" in obj.data.content,
+  );
 
   return (
     <Flex direction="column" gap="4">
       <Heading size="6">Hero Marketplace ({listedHeroes.length})</Heading>
-      
+
       {listedHeroes.length === 0 ? (
         <Card>
           <Text>No heroes are currently listed for sale</Text>
@@ -150,51 +166,57 @@ export default function SharedObjects({ refreshKey, setRefreshKey }: RefreshProp
               <Card key={listHeroId} style={{ padding: "16px" }}>
                 <Flex direction="column" gap="3">
                   {/* Hero Image */}
-                  <img 
-                    src={heroFields.image_url} 
+                  <img
+                    src={heroFields.image_url}
                     alt={heroFields.name}
-                    style={{ 
-                      width: "100%", 
-                      height: "200px", 
-                      objectFit: "cover", 
-                      borderRadius: "8px" 
+                    style={{
+                      width: "100%",
+                      height: "200px",
+                      objectFit: "cover",
+                      borderRadius: "8px",
                     }}
                     onError={(e) => {
-                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.style.display = "none";
                     }}
                   />
-                  
+
                   {/* Hero Info */}
                   <Flex direction="column" gap="2">
                     <Flex align="center" gap="2">
-                      <Text size="5" weight="bold">{heroFields.name}</Text>
+                      <Text size="5" weight="bold">
+                        {heroFields.name}
+                      </Text>
                       {fields.seller === account?.address && (
                         <Badge color="orange" size="1">
                           Your Listing
                         </Badge>
                       )}
                     </Flex>
-                    <Badge color="blue" size="2">Power: {heroFields.power}</Badge>
-                    <Badge color="green" size="2">Price: {priceInSui.toFixed(2)} SUI</Badge>
-                    
+                    <Badge color="blue" size="2">
+                      Power: {heroFields.power}
+                    </Badge>
+                    <Badge color="green" size="2">
+                      Price: {priceInSui.toFixed(2)} SUI
+                    </Badge>
+
                     <Text size="3" color="gray">
-                      Seller: {fields.seller.slice(0, 6)}...{fields.seller.slice(-4)}
+                      Seller: {fields.seller.slice(0, 6)}...
+                      {fields.seller.slice(-4)}
                     </Text>
                   </Flex>
 
                   {/* Buy Button - Anyone can buy including owner */}
-                  <Button 
+                  <Button
                     onClick={() => handleBuy(listHeroId, priceInSui.toString())}
                     disabled={!account || isBuying[listHeroId]}
                     loading={isBuying[listHeroId]}
                     color="green"
                   >
-                    {!account 
-                      ? "Connect Wallet to Buy" 
+                    {!account
+                      ? "Connect Wallet to Buy"
                       : isBuying[listHeroId]
                         ? "Buying..."
-                        : `Buy for ${priceInSui.toFixed(2)} SUI`
-                    }
+                        : `Buy for ${priceInSui.toFixed(2)} SUI`}
                   </Button>
                 </Flex>
               </Card>

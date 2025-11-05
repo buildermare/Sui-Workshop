@@ -1,23 +1,28 @@
-// Import the Transaction class from the SUI transactions library. This is needed to create a new transaction.
+// Sui işlemleri kütüphanesinden Transaction sınıfını import ediyoruz
 import { Transaction } from "@mysten/sui/transactions";
 
-// This function is for creating a new hero. It takes the package ID, name, image URL, and power as input.
-export const createHero = (packageId: string, name: string, imageUrl: string, power: string) => {
-  // Create a new transaction object.
+// Yeni hero oluşturma fonksiyonu - package ID, isim, resim URL'i ve güç seviyesi alır
+export const createHero = (
+  packageId: string,
+  name: string,
+  imageUrl: string,
+  power: string,
+) => {
+  // Yeni bir işlem objesi oluştur
   const tx = new Transaction();
-  
-  // Create a new move call to the 'create_hero' function in the smart contract.
+
+  // Smart contract'taki 'create_hero' fonksiyonunu çağır
   tx.moveCall({
-    // The target function to call, constructed from the package ID.
+    // Çağrılacak hedef fonksiyon - package ID'den oluşturulur
     target: `${packageId}::hero::create_hero`,
-    // The arguments for the function: the hero's name, image URL, and power.
+    // Fonksiyon argümanları: hero ismi, resim URL'i ve güç seviyesi
     arguments: [
-      tx.pure.string(name), 
-      tx.pure.string(imageUrl), 
-      tx.pure.u64(Number(power))
+      tx.pure.string(name),
+      tx.pure.string(imageUrl),
+      tx.pure.u64(Number(power)),
     ],
   });
-  
-  // Return the created transaction.
+
+  // Oluşturulan işlemi geri döndür
   return tx;
 };

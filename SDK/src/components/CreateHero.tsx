@@ -1,4 +1,9 @@
-import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
+// Sui dApp kit hook'ları - cüzdan ve işlem yönetimi için
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+} from "@mysten/dapp-kit";
 import { Flex, Heading, Text, Card, Button, TextField } from "@radix-ui/themes";
 import { useState } from "react";
 import { useNetworkVariable } from "../networkConfig";
@@ -6,26 +11,36 @@ import { createHero } from "../utility/create_hero";
 import { RefreshProps } from "../types/props";
 
 export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
-  const account = useCurrentAccount();
-  const packageId = useNetworkVariable("packageId");
-  const suiClient = useSuiClient();
-  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const account = useCurrentAccount(); // Mevcut cüzdan hesabı
+  const packageId = useNetworkVariable("packageId"); // Smart contract package ID
+  const suiClient = useSuiClient(); // Sui client
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction(); // İşlem imzalama ve çalıştırma
 
+  // Form state'leri
   const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [power, setPower] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreateHero = async () => {
-    if (!account || !packageId || !name.trim() || !imageUrl.trim() || !power.trim()) return;
-    
+    if (
+      !account ||
+      !packageId ||
+      !name.trim() ||
+      !imageUrl.trim() ||
+      !power.trim()
+    )
+      return;
+
     setIsCreating(true);
-    
+
+    // Hero oluşturma işlemini hazırla
     const tx = createHero(packageId, name, imageUrl, power);
     signAndExecute(
       { transaction: tx },
       {
         onSuccess: async ({ digest }) => {
+          // İşlemin blockchain'de onaylanmasını bekle
           await suiClient.waitForTransaction({
             digest,
             options: {
@@ -33,7 +48,8 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
               showObjectChanges: true,
             },
           });
-          
+
+          // Form'u temizle ve listeyi yenile
           setName("");
           setImageUrl("");
           setPower("");
@@ -42,12 +58,13 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
         },
         onError: () => {
           setIsCreating(false);
-        }
-      }
+        },
+      },
     );
   };
 
-  const isFormValid = name.trim() && imageUrl.trim() && power.trim() && Number(power) > 0;
+  const isFormValid =
+    name.trim() && imageUrl.trim() && power.trim() && Number(power) > 0;
 
   if (!account) {
     return (
@@ -61,10 +78,12 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
     <Card style={{ padding: "20px" }}>
       <Flex direction="column" gap="4">
         <Heading size="6">Create New Hero</Heading>
-        
+
         <Flex direction="column" gap="3">
           <Flex direction="column" gap="2">
-            <Text size="3" weight="medium">Hero Name</Text>
+            <Text size="3" weight="medium">
+              Hero Name
+            </Text>
             <TextField.Root
               placeholder="Enter hero name (e.g., Fire Dragon)"
               value={name}
@@ -73,7 +92,9 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
           </Flex>
 
           <Flex direction="column" gap="2">
-            <Text size="3" weight="medium">Image URL</Text>
+            <Text size="3" weight="medium">
+              Image URL
+            </Text>
             <TextField.Root
               placeholder="Enter image URL (e.g., https://example.com/hero.jpg)"
               value={imageUrl}
@@ -82,7 +103,9 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
           </Flex>
 
           <Flex direction="column" gap="2">
-            <Text size="3" weight="medium">Power Level</Text>
+            <Text size="3" weight="medium">
+              Power Level
+            </Text>
             <TextField.Root
               placeholder="Enter power level (e.g., 100)"
               type="number"
@@ -92,7 +115,7 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
             />
           </Flex>
 
-          <Button 
+          <Button
             onClick={handleCreateHero}
             disabled={!isFormValid || isCreating}
             size="3"
@@ -107,20 +130,24 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
         {name && imageUrl && power && (
           <Card style={{ padding: "16px", background: "var(--gray-a2)" }}>
             <Flex direction="column" gap="2">
-              <Text size="3" weight="medium" color="gray">Preview:</Text>
-              <Text size="4">{name} (Power: {power})</Text>
+              <Text size="3" weight="medium" color="gray">
+                Preview:
+              </Text>
+              <Text size="4">
+                {name} (Power: {power})
+              </Text>
               {imageUrl && (
-                <img 
-                  src={imageUrl} 
+                <img
+                  src={imageUrl}
                   alt={name}
-                  style={{ 
-                    width: "120px", 
-                    height: "80px", 
-                    objectFit: "cover", 
-                    borderRadius: "6px" 
+                  style={{
+                    width: "120px",
+                    height: "80px",
+                    objectFit: "cover",
+                    borderRadius: "6px",
                   }}
                   onError={(e) => {
-                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.style.display = "none";
                   }}
                 />
               )}
