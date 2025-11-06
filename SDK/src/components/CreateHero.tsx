@@ -9,6 +9,11 @@ import { useState } from "react";
 import { useNetworkVariable } from "../networkConfig";
 import { createHero } from "../utility/create_hero";
 import { RefreshProps } from "../types/props";
+/* import { EnokiClient } from "@enoki-labs/enoki-clients"; // Bu hata verdi */
+/* import { toB64 } from "@mysten/sui.js/utils"; // Bu yine hata verdi bende */
+/* Sanırım paketler güncel değil yapay zekayla bunları buldum */
+import { EnokiClient } from "@mysten/enoki";
+import { toB64 } from "@mysten/sui/utils";
 
 export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
   const account = useCurrentAccount(); // Mevcut cüzdan hesabı
@@ -21,6 +26,15 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
   const [imageUrl, setImageUrl] = useState("");
   const [power, setPower] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+/*
+  const enoki = new EnokiClient({
+    apiKey: process.env.REACT_APP_ENOKI_API_KEY, // Burası bende hata verdi nedense ts bilmiyom fazla gpt den yardım aldım
+  });
+*/
+
+  const enoki = new EnokiClient({
+    apiKey: import.meta.env.VITE_ENOKI_API_KEY,
+  });
 
   const handleCreateHero = async () => {
     if (
@@ -35,32 +49,54 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
     setIsCreating(true);
 
     // Hero oluşturma işlemini hazırla
-    const tx = createHero(packageId, name, imageUrl, power);
-    signAndExecute(
-      { transaction: tx },
-      {
-        onSuccess: async ({ digest }) => {
-          // İşlemin blockchain'de onaylanmasını bekle
-          await suiClient.waitForTransaction({
-            digest,
-            options: {
-              showEffects: true,
-              showObjectChanges: true,
-            },
-          });
+    const tx = createHero(packageId, name, imageUrl, power); /* Örnekteki işlemi yapıyor zaten */
+    const txBytes = await tx.build({ client: suiClient , onlyTransactionKind: true /* Bu olmadığı zaman enoki hata veriyordu */}); 
 
-          // Form'u temizle ve listeyi yenile
-          setName("");
-          setImageUrl("");
-          setPower("");
-          setRefreshKey(refreshKey + 1);
-          setIsCreating(false);
+    try {
+      const sponsoredTx = await enoki.createSponsoredTransaction({
+        network: "testnet",
+        transactionKindBytes: toB64(txBytes),
+        sender: account.address, /* parametreden geliyor */
+        allowedMoveCallTargets: [
+          `${packageId}::hero::create_hero`, /* packageId boştu parametreden doldurduk */
+        ],
+      });
+  
+      // Sponsorlu işlemi çalıştır
+      const result = signAndExecute(
+        { transaction: sponsoredTx.bytes /* güncel kütüphanede sponsoredTx bir obje datasına .bytes ile ulaşıyoruz sanırım */ },
+        {
+          onSuccess: async ({ digest }) => {
+            // İşlemin blockchain'de onaylanmasını bekle
+            await suiClient.waitForTransaction({
+              digest,
+              options: {
+                showEffects: true,
+                showObjectChanges: true,
+              },
+            });
+  
+            // Form'u temizle ve listeyi yenile
+            setName("");
+            setImageUrl("");
+            setPower("");
+            setRefreshKey(refreshKey + 1);
+            console.log("NFT başarıyla oluşturuldu! Digest:", digest);
+            setIsCreating(false);
+          },
+          onError: () => {
+            setIsCreating(false);
+          },
         },
-        onError: () => {
-          setIsCreating(false);
-        },
-      },
-    );
+      );
+  
+      return result;
+  
+    } catch (error) {
+      console.error("Gas sponsorluğu başarısız:", error);
+      setIsCreating(false); /* Bunu da eklememiz lazım sanırım ? */
+    }
+
   };
 
   const isFormValid =
