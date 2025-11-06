@@ -22,7 +22,7 @@ export function WalletStatus() {
     },
   );
 
- // Eğer hesap bağlı değilse, cüzdan bağlama mesajı göster
+  // Eğer hesap bağlı değilse, cüzdan bağlama mesajı göster
   if (!account) {
     return (
       <Card>
@@ -34,29 +34,16 @@ export function WalletStatus() {
   return (
     <Card>
       <Flex direction="column" gap="2">
-        <Text size="4" weight="bold">Cüzdan Durumu</Text>
+        <Text size="4" weight="bold">
+          Cüzdan Durumu
+        </Text>
         <Text>Adres: {account.address}</Text>
         <Text>
-          {/* Sui'de bakiye 1_000_000_000 ile bölünür çünkü Sui 9 decimal basamak kullanır */}
-          Bakiye: {balance ? Number(balance.totalBalance) / 1_000_000_000 : "Yükleniyor..."} SUI
-        </Text>
-      </Flex>
-    </Card>
-  );
-  }
-
-  return (
-    <Card>
-      <Flex direction="column" gap="2">
-        <Text size="4" weight="bold">
-          Wallet Status
-        </Text>
-        <Text>Address: {account.address}</Text>
-        <Text>
-          Balance:{" "}
+          {/* Sui'de bakiye 1_000_000_000 ile bölünür çünkü Sui 9 decimal basamak kullanır (mist)*/}
+          Bakiye:{" "}
           {balance
             ? Number(balance.totalBalance) / 1_000_000_000
-            : "Loading..."}{" "}
+            : "Yükleniyor..."}{" "}
           SUI
         </Text>
       </Flex>
