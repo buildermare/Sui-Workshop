@@ -182,7 +182,7 @@ async function createHeroWithSponsorship(
 
 ## Enoki API Key'ini Nasıl Alırız?
 
-1. [Enoki'nin sitesine git](https://enoki.mysten.io/)
+1. [Enoki'nin sitesine git](https://portal.enoki.mystenlabs.com/)
 2. **"Sign up" yap** (wallet bağla)
 3. **Dashboard'a gir**
 4. **"Create API Key" butonuna bas**
