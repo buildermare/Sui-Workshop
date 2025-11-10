@@ -9,8 +9,12 @@ import { useState } from "react";
 import { useNetworkVariable } from "../networkConfig";
 import { createHero } from "../utility/create_hero";
 import { RefreshProps } from "../types/props";
+import { EnokiClient } from '@mysten/enoki';
+import { toB64 } from "@mysten/sui/utils";
 
-export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
+
+
+export function CreateHero({}: RefreshProps) {
   const account = useCurrentAccount(); // Mevcut cüzdan hesabı
   const packageId = useNetworkVariable("packageId"); // Smart contract package ID
   const suiClient = useSuiClient(); // Sui client
@@ -21,8 +25,12 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
   const [imageUrl, setImageUrl] = useState("");
   const [power, setPower] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const enoki = new EnokiClient({
+    apiKey: import.meta.env.VITE_ENOKI_API_KEY,
+  });
 
   const handleCreateHero = async () => {
+    
     if (
       !account ||
       !packageId ||
@@ -31,37 +39,47 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
       !power.trim()
     )
       return;
+    if (!account || !account.address) {
+    alert("Please connect your wallet first!");
+      return;
+    
+}
+
 
     setIsCreating(true);
 
     // Hero oluşturma işlemini hazırla
     const tx = createHero(packageId, name, imageUrl, power);
-    signAndExecute(
-      { transaction: tx },
-      {
-        onSuccess: async ({ digest }) => {
-          // İşlemin blockchain'de onaylanmasını bekle
-          await suiClient.waitForTransaction({
-            digest,
-            options: {
-              showEffects: true,
-              showObjectChanges: true,
-            },
-          });
+    tx.setSender(account.address); 
+    
+    const txBytes = await tx.build({ client: suiClient, onlyTransactionKind: true });
+  
+    try {
+    const sponsoredTx = await enoki.createSponsoredTransaction({
+      network: "testnet",
+      transactionKindBytes: toB64(txBytes),
+      sender: account.address,
+      allowedMoveCallTargets: [
+        `${packageId}::hero::create_hero`
+      ],
+    });
 
-          // Form'u temizle ve listeyi yenile
-          setName("");
-          setImageUrl("");
-          setPower("");
-          setRefreshKey(refreshKey + 1);
-          setIsCreating(false);
-        },
-        onError: () => {
-          setIsCreating(false);
-        },
-      },
-    );
+    // Sponsorlu işlemi çalıştır
+    const result = await signAndExecute({
+      transaction: sponsoredTx.bytes,
+    });
+
+    console.log("NFT başarıyla oluşturuldu!", result);
+    return result;
+
+  } catch (error) {
+    console.error("Gas sponsorluğu başarısız:", error);
+  }
   };
+  
+  
+
+
 
   const isFormValid =
     name.trim() && imageUrl.trim() && power.trim() && Number(power) > 0;
