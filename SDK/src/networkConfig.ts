@@ -17,7 +17,7 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
       url: getFullnodeUrl("testnet"), // Test ağı URL'i
       variables: {
         packageId:
-          "0xd75056c08268e5551f54500e54c61a76588127037f928fdfc042567c3a8e596b", // TODO: Eğitmenden package ID al
+          "0x234eb905d1365596ef4488bfe7ea0d717955862a651b1394cf1e57431e33bc8a", // TODO: Eğitmenden package ID al
       },
     },
     mainnet: {
