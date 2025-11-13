@@ -62,7 +62,8 @@ Yemek senin oluyor, ama para patron'un cüzdanından çıkıyor.
 
 ```typescript
 // Enoki müşterisini oluşturduk
-import { EnokiClient } from "@enoki-labs/enoki-clients";
+import { EnokiClient } from "@mysten/enoki";
+
 
 const enoki = new EnokiClient({
   apiKey: "SENIN_ENOKI_API_KEY" // Enoki'den alacağın anahtar
@@ -122,9 +123,9 @@ signAndExecute({
 ## Gerçek Kod Örneği (Tamamı)
 
 ```typescript
-import { EnokiClient } from "@enoki-labs/enoki-clients";
+import { EnokiClient } from "@mysten/enoki";
 import { Transaction } from "@mysten/sui.js/transactions";
-import { toB64 } from "@mysten/sui.js/utils";
+import { toB64 } from "@mysten/sui/utils";
 
 // 1. Enoki'yi başlat
 const enoki = new EnokiClient({
