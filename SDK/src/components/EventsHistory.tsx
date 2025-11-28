@@ -10,7 +10,7 @@ interface EventsHistoryProps {
 export default function EventsHistory({ refreshKey }: EventsHistoryProps) {
   const packageId = useNetworkVariable("packageId");
 
-  // HeroListed ve HeroBought olaylarını aynı anda sorgula
+  // HeroListed, HeroBought ve HeroDelisted olaylarını aynı anda sorgula
   const eventQueries = useSuiClientQueries({
     queries: [
       {
@@ -37,14 +37,28 @@ export default function EventsHistory({ refreshKey }: EventsHistoryProps) {
         queryKey: ["queryEvents", packageId, "HeroBought", refreshKey],
         enabled: !!packageId,
       },
+      {
+        method: "queryEvents",
+        params: {
+          query: {
+            MoveEventType: `${packageId}::hero::HeroDelisted`, // Satıştan çıkarma olayları
+          },
+          limit: 20,
+          order: "descending",
+        },
+        queryKey: ["queryEvents", packageId, "HeroDelisted", refreshKey],
+        enabled: !!packageId,
+      },
     ],
   });
 
-  const [listedEventsQuery, boughtEventsQuery] = eventQueries;
+  const [listedEventsQuery, boughtEventsQuery, delistedEventsQuery] = eventQueries;
   const listedEvents = listedEventsQuery.data;
   const boughtEvents = boughtEventsQuery.data;
+  const delistedEvents = delistedEventsQuery.data;
   const isListedPending = listedEventsQuery.isPending;
   const isBoughtPending = boughtEventsQuery.isPending;
+  const isDelistedPending = delistedEventsQuery.isPending;
 
   const formatTimestamp = (timestamp: string) => {
     return new Date(Number(timestamp)).toLocaleString();
@@ -58,7 +72,7 @@ export default function EventsHistory({ refreshKey }: EventsHistoryProps) {
     return (Number(price) / 1_000_000_000).toFixed(2);
   };
 
-  if (isListedPending || isBoughtPending) {
+  if (isListedPending || isBoughtPending || isDelistedPending) {
     return (
       <Card>
         <Text>Loading events history...</Text>
@@ -74,6 +88,10 @@ export default function EventsHistory({ refreshKey }: EventsHistoryProps) {
     ...(boughtEvents?.data || []).map((event) => ({
       ...event,
       type: "bought" as const,
+    })),
+    ...(delistedEvents?.data || []).map((event) => ({
+      ...event,
+      type: "delisted" as const,
     })),
   ].sort((a, b) => Number(b.timestampMs) - Number(a.timestampMs));
 
@@ -98,10 +116,20 @@ export default function EventsHistory({ refreshKey }: EventsHistoryProps) {
                 <Flex direction="column" gap="2">
                   <Flex align="center" gap="3">
                     <Badge
-                      color={event.type === "listed" ? "blue" : "green"}
+                      color={
+                        event.type === "listed"
+                          ? "blue"
+                          : event.type === "bought"
+                            ? "green"
+                            : "red"
+                      }
                       size="2"
                     >
-                      {event.type === "listed" ? "Hero Listed" : "Hero Bought"}
+                      {event.type === "listed"
+                        ? "Hero Listed"
+                        : event.type === "bought"
+                          ? "Hero Bought"
+                          : "Hero Delisted"}
                     </Badge>
                     <Text size="3" color="gray">
                       {formatTimestamp(event.timestampMs!)}
@@ -109,16 +137,18 @@ export default function EventsHistory({ refreshKey }: EventsHistoryProps) {
                   </Flex>
 
                   <Flex align="center" gap="4" wrap="wrap">
-                    <Text size="3">
-                      <strong>Price:</strong> {formatPrice(eventData.price)} SUI
-                    </Text>
+                    {event.type !== "delisted" && (
+                      <Text size="3">
+                        <strong>Price:</strong> {formatPrice(eventData.price)} SUI
+                      </Text>
+                    )}
 
                     {event.type === "listed" ? (
                       <Text size="3">
                         <strong>Seller:</strong>{" "}
                         {formatAddress(eventData.seller)}
                       </Text>
-                    ) : (
+                    ) : event.type === "bought" ? (
                       <Flex gap="4">
                         <Text size="3">
                           <strong>Buyer:</strong>{" "}
@@ -129,6 +159,11 @@ export default function EventsHistory({ refreshKey }: EventsHistoryProps) {
                           {formatAddress(eventData.seller)}
                         </Text>
                       </Flex>
+                    ) : (
+                      <Text size="3">
+                        <strong>Seller:</strong>{" "}
+                        {formatAddress(eventData.seller)}
+                      </Text>
                     )}
 
                     <Text
