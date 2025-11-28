@@ -19,6 +19,8 @@ import { useNetworkVariable } from "../networkConfig";
 import { ListHero } from "../types/hero";
 // Hero satın alma işlemi için utility fonksiyonu
 import { buyHero } from "../utility/buy_hero";
+// Hero satıştan çıkarma işlemi için utility fonksiyonu
+import { delistHero } from "../utility/delist_hero";
 import { RefreshProps } from "../types/props";
 
 export default function SharedObjects({
@@ -29,6 +31,7 @@ export default function SharedObjects({
   const packageId = useNetworkVariable("packageId"); // Smart contract package ID
   const suiClient = useSuiClient(); // Sui client
   const [isBuying, setIsBuying] = useState<{ [key: string]: boolean }>({}); // Her hero için satın alma durumu
+  const [isDelisting, setIsDelisting] = useState<{ [key: string]: boolean }>({}); // Her hero için satıştan çıkarma durumu
   const { mutate: signAndExecute } = useSignAndExecuteTransaction(); // İşlem imzalama ve çalıştırma
 
   // Satışa çıkarılan hero'ları bulmak için 'HeroListed' olaylarını sorgula
@@ -101,6 +104,38 @@ export default function SharedObjects({
         },
         onError: () => {
           setIsBuying((prev) => ({ ...prev, [listHeroId]: false }));
+        },
+      },
+    );
+  };
+
+  // Hero satıştan çıkarma işlemini yöneten fonksiyon
+  const handleDelist = (listHeroId: string) => {
+    if (!account || !packageId) return;
+
+    setIsDelisting((prev) => ({ ...prev, [listHeroId]: true }));
+
+    // Hero satıştan çıkarma işlemini oluştur
+    const tx = delistHero(packageId, listHeroId);
+    signAndExecute(
+      { transaction: tx },
+      {
+        onSuccess: async ({ digest }) => {
+          // İşlemin blockchain'de onaylanmasını bekle
+          await suiClient.waitForTransaction({
+            digest,
+            options: {
+              showEffects: true,
+              showObjectChanges: true,
+            },
+          });
+
+          // Hero listesini yenile
+          setRefreshKey(refreshKey + 1);
+          setIsDelisting((prev) => ({ ...prev, [listHeroId]: false }));
+        },
+        onError: () => {
+          setIsDelisting((prev) => ({ ...prev, [listHeroId]: false }));
         },
       },
     );
@@ -206,18 +241,32 @@ export default function SharedObjects({
                   </Flex>
 
                   {/* Buy Button - Anyone can buy including owner */}
-                  <Button
-                    onClick={() => handleBuy(listHeroId, priceInSui.toString())}
-                    disabled={!account || isBuying[listHeroId]}
-                    loading={isBuying[listHeroId]}
-                    color="green"
-                  >
-                    {!account
-                      ? "Connect Wallet to Buy"
-                      : isBuying[listHeroId]
-                        ? "Buying..."
-                        : `Buy for ${priceInSui.toFixed(2)} SUI`}
-                  </Button>
+                  {fields.seller !== account?.address && (
+                    <Button
+                      onClick={() => handleBuy(listHeroId, priceInSui.toString())}
+                      disabled={!account || isBuying[listHeroId]}
+                      loading={isBuying[listHeroId]}
+                      color="green"
+                    >
+                      {!account
+                        ? "Connect Wallet to Buy"
+                        : isBuying[listHeroId]
+                          ? "Buying..."
+                          : `Buy for ${priceInSui.toFixed(2)} SUI`}
+                    </Button>
+                  )}
+
+                  {/* Delist Button - Only owner can delist */}
+                  {fields.seller === account?.address && (
+                    <Button
+                      onClick={() => handleDelist(listHeroId)}
+                      disabled={!account || isDelisting[listHeroId]}
+                      loading={isDelisting[listHeroId]}
+                      color="red"
+                    >
+                      {isDelisting[listHeroId] ? "Delisting..." : "Cancel Listing"}
+                    </Button>
+                  )}
                 </Flex>
               </Card>
             );

@@ -74,6 +74,16 @@ module nft_module::hero;
         timestamp: u64,
     }
 
+    // Defines a public event struct named HeroDelisted. This event is emitted when a hero listing is cancelled.
+    public struct HeroDelisted has copy, drop {
+        // Holds the identifier (ID) of the delisted hero.
+        id: ID,
+        // Holds the address of the seller who cancelled the listing.
+        seller: address,
+        // Holds the delisting timestamp.
+        timestamp: u64,
+    }
+
     // Defines the functions.
     // ========= FUNCTIONS =========
 
@@ -162,6 +172,31 @@ module nft_module::hero;
             price,
             // Sets the buyer's address.
             buyer: ctx.sender(),
+            // Sets the seller's address.
+            seller,
+            // Sets the timestamp of the transaction.
+            timestamp: ctx.epoch_timestamp_ms(),
+        });
+
+        // Deletes the identifier (ID) of the ListHero object.
+        id.delete();
+    }
+
+    // Defines a public entry function named delist_hero. This function cancels a hero listing and returns it to the seller.
+    public entry fun delist_hero(list_hero: ListHero, ctx: &mut TxContext) {
+        // Destructures the ListHero object into its fields.
+        let ListHero { id, nft, price: _, seller } = list_hero;
+
+        // Checks that only the seller can delist the hero.
+        assert!(ctx.sender() == seller, 1);
+
+        // Transfers the hero back to the seller.
+        transfer::public_transfer(nft, seller);
+
+        // Emits the HeroDelisted event.
+        event::emit(HeroDelisted {
+            // Sets the identifier (ID) of the delisted hero.
+            id: id.to_inner(),
             // Sets the seller's address.
             seller,
             // Sets the timestamp of the transaction.

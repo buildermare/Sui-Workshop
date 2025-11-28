@@ -19,7 +19,7 @@ export const createHero = (
     arguments: [
       tx.pure.string(name),
       tx.pure.string(imageUrl),
-      tx.pure.u64(Number(power)),
+      tx.pure.u8(Number(power)),
     ],
   });
 
