@@ -19,7 +19,7 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
   // Form state'leri
   const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [power, setPower] = useState("");
+  const [power, setPower] = useState(0);
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreateHero = async () => {
@@ -27,15 +27,18 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
       !account ||
       !packageId ||
       !name.trim() ||
-      !imageUrl.trim() ||
-      !power.trim()
+      !imageUrl.trim()
     )
       return;
 
     setIsCreating(true);
 
+    // 0 ile 100 arasında random power değeri oluştur
+    const randomPower = Math.floor(Math.random() * 101);
+    setPower(randomPower);
+
     // Hero oluşturma işlemini hazırla
-    const tx = createHero(packageId, name, imageUrl, power);
+    const tx = createHero(packageId, name, imageUrl, randomPower.toString());
     signAndExecute(
       { transaction: tx },
       {
@@ -52,7 +55,6 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
           // Form'u temizle ve listeyi yenile
           setName("");
           setImageUrl("");
-          setPower("");
           setRefreshKey(refreshKey + 1);
           setIsCreating(false);
         },
@@ -64,7 +66,7 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
   };
 
   const isFormValid =
-    name.trim() && imageUrl.trim() && power.trim() && Number(power) > 0;
+    name.trim() && imageUrl.trim();
 
   if (!account) {
     return (
@@ -102,19 +104,6 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
             />
           </Flex>
 
-          <Flex direction="column" gap="2">
-            <Text size="3" weight="medium">
-              Power Level
-            </Text>
-            <TextField.Root
-              placeholder="Enter power level (e.g., 100)"
-              type="number"
-              min="1"
-              value={power}
-              onChange={(e) => setPower(e.target.value)}
-            />
-          </Flex>
-
           <Button
             onClick={handleCreateHero}
             disabled={!isFormValid || isCreating}
@@ -127,14 +116,14 @@ export function CreateHero({ refreshKey, setRefreshKey }: RefreshProps) {
         </Flex>
 
         {/* Preview */}
-        {name && imageUrl && power && (
+        {name && imageUrl && (
           <Card style={{ padding: "16px", background: "var(--gray-a2)" }}>
             <Flex direction="column" gap="2">
               <Text size="3" weight="medium" color="gray">
                 Preview:
               </Text>
               <Text size="4">
-                {name} (Power: {power})
+                {name}
               </Text>
               {imageUrl && (
                 <img

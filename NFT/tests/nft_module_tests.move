@@ -26,7 +26,7 @@ module nft_module::nft_module_tests {
             hero::create_hero(
                 b"Buillder".to_string(),
                 b"https://picsum.photos/200".to_string(),
-                9000,
+                90,
                 scenario.ctx(),
             );
         };
@@ -42,7 +42,7 @@ module nft_module::nft_module_tests {
             // Test getter functions
             assert!(hero.hero_name() == b"Buillder".to_string(), EHeroNameMismatch);
             assert!(hero.hero_image_url() == b"https://picsum.photos/200".to_string(), EHeroImageUrlMismatch);
-            assert!(hero.hero_power() == 9000, EHeroPowerMismatch);
+            assert!(hero.hero_power() == 90, EHeroPowerMismatch);
             ts::return_to_sender(&scenario, hero);
         };
 
@@ -58,7 +58,7 @@ module nft_module::nft_module_tests {
             hero::create_hero(
                 b"mare".to_string(),
                 b"https://picsum.photos/200".to_string(),
-                8500,
+                85,
                 scenario.ctx(),
             );
         };
@@ -89,7 +89,7 @@ module nft_module::nft_module_tests {
             hero::create_hero(
                 b"Sui".to_string(),
                 b"https://picsum.photos/200".to_string(),
-                7500,
+                75,
                 scenario.ctx(),
             );
         };
@@ -120,7 +120,7 @@ module nft_module::nft_module_tests {
             hero::create_hero(
                 b"move".to_string(),
                 b"https://picsum.photos/200".to_string(),
-                6000,
+                60,
                 scenario.ctx(),
             );
         };
@@ -151,7 +151,7 @@ module nft_module::nft_module_tests {
         {
             let hero = ts::take_from_address<Hero>(&scenario, RECIPIENT);
             assert!(hero.hero_name() == b"move".to_string(), EHeroNameMismatch);
-            assert!(hero.hero_power() == 6000, EHeroPowerMismatch);
+            assert!(hero.hero_power() == 60, EHeroPowerMismatch);
             ts::return_to_address(RECIPIENT, hero);
         };
 

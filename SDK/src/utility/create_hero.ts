@@ -6,7 +6,7 @@ export const createHero = (
   packageId: string,
   name: string,
   imageUrl: string,
-  power: string,
+  power: string
 ) => {
   // Yeni bir işlem objesi oluştur
   const tx = new Transaction();

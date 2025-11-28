@@ -22,7 +22,7 @@ module nft_module::hero;
         // Holds the image URL of the hero.
         image_url: String,
         // Holds the power of the hero.
-        power: u64,
+        power: u8,
     }
 
     // Defines a public struct named ListHero. This struct represents a hero listed for sale.
@@ -35,7 +35,7 @@ module nft_module::hero;
         price: u64,
         // Holds the address of the seller.
         seller: address,
-    }
+    } 
 
     // Defines a public struct named HeroMetadata. This struct holds metadata for a hero.
     public struct HeroMetadata has key, store {
@@ -80,7 +80,7 @@ module nft_module::hero;
     // Suppresses the self-transfer lint warning.
     #[allow(lint(self_transfer))] // Bu fonksiyonda bir varlığın sahibine geri transfer edilmesi mümkün ve bu bir hata değil.
     // Defines a public entry function named create_hero. This function creates a new hero.
-    public entry fun create_hero(name: String, image_url: String, power: u64,  ctx: &mut TxContext) {
+    public entry fun create_hero(name: String, image_url: String, power: u8,  ctx: &mut TxContext) {
         // Creates a new Hero object.
         let hero = Hero {
             // Creates a new unique identifier (ID).
@@ -200,7 +200,7 @@ module nft_module::hero;
     // A function that can only be used in tests.
     #[test_only]
     // Defines a public function named hero_power. This function returns the power of a hero.
-    public fun hero_power(hero: &Hero): u64 {
+    public fun hero_power(hero: &Hero): u8 {
         // Returns the power of the hero.
         hero.power
     }
@@ -212,3 +212,7 @@ module nft_module::hero;
         // Returns the identifier (ID) of the hero.
         object::id(hero)
     }
+
+
+
+

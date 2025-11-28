@@ -1,9 +1,0 @@
-copy (Kopyalama Yeteneği)
-
-Bu, bir struct'ın **fotokopisinin çekilip çekilemeyeceğini** söyler.
-
-
-*   **Bir telefon numarası:** Bunun `copy` yeteneği vardır. İstediğin kadar kağıda yazabilir, kopyalayabilirsin. Değeri, bilginin kendisidir.
-*   **Mona Lisa tablosu:** Bunun `copy` yeteneği **yoktur**. Orijinali tektir. Kopyasını yapamazsın, sadece orijinalini bir yerden başka bir yere "taşıyabilirsin".
-
-Değerli varlıkların (NFT'ler, paralar) asla `copy` yeteneği olmamalıdır. Eğer `Hero` NFT'nin `copy` yeteneği olsaydı, herkes elindeki tek bir NFT'yi sonsuz kere kopyalayarak zengin olmaya çalışırdı ve NFT'nin hiçbir değeri kalmazdı. Bu yüzden Move, değerli varlıkların kopyalanamayacağını garanti altına alır.

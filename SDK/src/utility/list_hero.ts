@@ -5,7 +5,7 @@ import { Transaction } from "@mysten/sui/transactions";
 export const listHero = (
   packageId: string,
   heroId: string,
-  priceInSui: string,
+  priceInSui: string
 ) => {
   // Yeni bir işlem objesi oluştur
   const tx = new Transaction();
