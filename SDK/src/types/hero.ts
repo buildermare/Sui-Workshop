@@ -36,3 +36,26 @@ export interface HeroBoughtEvent {
   seller: string; // Satıcı
   timestamp: string; // Zaman damgası
 }
+
+// Hero metadata için tip tanımlaması
+export interface HeroMetadata {
+  uid: {
+    id: string; // Metadata nesnesinin ID'si
+  };
+  timestamp: string; // Oluşturma zamanı
+  rarity: number; // Nadirlik seviyesi (1-5)
+}
+
+// Rarity seviyelerine göre renk ve label mapping
+export const RARITY_MAP = {
+  1: { label: "Common", color: "gray" as const },
+  2: { label: "Uncommon", color: "blue" as const },
+  3: { label: "Rare", color: "purple" as const },
+  4: { label: "Epic", color: "orange" as const },
+  5: { label: "Legendary", color: "red" as const },
+};
+
+// Rarity'den label ve color al
+export const getRarityInfo = (rarity: number) => {
+  return RARITY_MAP[rarity as keyof typeof RARITY_MAP] || RARITY_MAP[1];
+};

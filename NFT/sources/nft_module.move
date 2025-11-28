@@ -43,6 +43,8 @@ module nft_module::hero;
         id: UID,
         // Holds the creation timestamp.
         timestamp: u64,
+        // Holds the rarity of the hero (1=Common, 2=Uncommon, 3=Rare, 4=Epic, 5=Legendary).
+        rarity: u8,
     }
 
     // Defines the events.
@@ -103,12 +105,27 @@ module nft_module::hero;
             power
         };
 
+        // Determines the rarity based on the power value.
+        let rarity = if (power >= 80) {
+            5  // Legendary
+        } else if (power >= 60) {
+            4  // Epic
+        } else if (power >= 40) {
+            3  // Rare
+        } else if (power >= 20) {
+            2  // Uncommon
+        } else {
+            1  // Common
+        };
+
         // Creates a new HeroMetadata object.
         let hero_metadata = HeroMetadata {
             // Creates a new unique identifier (ID).
             id: object::new(ctx),
             // Sets the timestamp of the transaction.
             timestamp: ctx.epoch_timestamp_ms(),
+            // Sets the rarity based on power.
+            rarity,
         };
 
         // Transfers the created Hero object to the sender's address.

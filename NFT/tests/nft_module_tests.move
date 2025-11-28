@@ -118,7 +118,7 @@ module nft_module::nft_module_tests {
         // Create and list a hero
         {
             hero::create_hero(
-                b"move".to_string(),
+                b"Maintained and created byHDemir".to_string(),
                 b"https://picsum.photos/200".to_string(),
                 60,
                 scenario.ctx(),
@@ -150,7 +150,7 @@ module nft_module::nft_module_tests {
         
         {
             let hero = ts::take_from_address<Hero>(&scenario, RECIPIENT);
-            assert!(hero.hero_name() == b"move".to_string(), EHeroNameMismatch);
+            assert!(hero.hero_name() == b"Maintained and created byHDemir".to_string(), EHeroNameMismatch);
             assert!(hero.hero_power() == 60, EHeroPowerMismatch);
             ts::return_to_address(RECIPIENT, hero);
         };

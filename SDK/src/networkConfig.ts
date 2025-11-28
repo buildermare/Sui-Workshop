@@ -10,21 +10,21 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
       url: getFullnodeUrl("devnet"), // Geliştirme ağı URL'i
       variables: {
         packageId:
-          "0x49069d84806a85873189623de106e1f0532253ad48e47dfbf2035cf2e39d6053", // TODO: Eğitmenden package ID al
+          "0x13220bb077dbbf895506a8fb424db3c9e85c2911a64de899fc32d57e1177437c", // TODO: Eğitmenden package ID al
       },
     },
     testnet: {
       url: getFullnodeUrl("testnet"), // Test ağı URL'i
       variables: {
         packageId:
-          "0x49069d84806a85873189623de106e1f0532253ad48e47dfbf2035cf2e39d6053", // TODO: Eğitmenden package ID al
+          "0x13220bb077dbbf895506a8fb424db3c9e85c2911a64de899fc32d57e1177437c", // TODO: Eğitmenden package ID al
       },
     },
     mainnet: {
       url: getFullnodeUrl("mainnet"), // Ana ağ URL'i
       variables: {
         packageId:
-          "0x49069d84806a85873189623de106e1f0532253ad48e47dfbf2035cf2e39d6053", // TODO: Eğitmenden package ID al
+          "0x13220bb077dbbf895506a8fb424db3c9e85c2911a64de899fc32d57e1177437c", // TODO: Eğitmenden package ID al
       },
     },
   });

@@ -16,7 +16,7 @@ import {
 } from "@radix-ui/themes";
 import { useState } from "react";
 import { useNetworkVariable } from "../networkConfig";
-import { ListHero } from "../types/hero";
+import { ListHero, getRarityInfo } from "../types/hero";
 // Hero satın alma işlemi için utility fonksiyonu
 import { buyHero } from "../utility/buy_hero";
 // Hero satıştan çıkarma işlemi için utility fonksiyonu
@@ -230,6 +230,16 @@ export default function SharedObjects({
                     <Badge color="blue" size="2">
                       Power: {heroFields.power}
                     </Badge>
+                    {(() => {
+                      const power = parseInt(heroFields.power);
+                      const rarity = power >= 80 ? 5 : power >= 60 ? 4 : power >= 40 ? 3 : power >= 20 ? 2 : 1;
+                      const rarityInfo = getRarityInfo(rarity);
+                      return (
+                        <Badge color={rarityInfo.color} size="2">
+                          {rarityInfo.label}
+                        </Badge>
+                      );
+                    })()}
                     <Badge color="green" size="2">
                       Price: {priceInSui.toFixed(2)} SUI
                     </Badge>

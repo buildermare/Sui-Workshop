@@ -18,7 +18,7 @@ import {
 } from "@radix-ui/themes";
 import { useState } from "react";
 import { useNetworkVariable } from "../networkConfig";
-import { Hero } from "../types/hero";
+import { Hero, getRarityInfo } from "../types/hero";
 import { transferHero } from "../utility/transfer_hero";
 import { listHero } from "../utility/list_hero";
 import { RefreshProps } from "../types/props";
@@ -202,6 +202,16 @@ export function OwnedObjects({ refreshKey, setRefreshKey }: RefreshProps) {
                     <Badge color="blue" size="2">
                       Power: {fields.power}
                     </Badge>
+                    {(() => {
+                      const power = parseInt(fields.power);
+                      const rarity = power >= 80 ? 5 : power >= 60 ? 4 : power >= 40 ? 3 : power >= 20 ? 2 : 1; 
+                      const rarityInfo = getRarityInfo(rarity);
+                      return (
+                        <Badge color={rarityInfo.color} size="2">
+                          {rarityInfo.label}
+                        </Badge>
+                      );
+                    })()}
 
                     <Flex align="center" gap="2">
                       <Text
